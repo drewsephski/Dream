@@ -385,8 +385,8 @@ export const ConfigurePanel = () => {
               onClick={() => {
                 if (selectedAppId) {
                   navigate({
-                    to: "/app-details",
-                    search: { appId: selectedAppId },
+                    to: "/app/$appId",
+                    params: { appId: selectedAppId.toString() },
                   });
                 }
               }}

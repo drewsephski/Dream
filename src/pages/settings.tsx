@@ -24,6 +24,9 @@ import { AutoUpdateSwitch } from "@/components/AutoUpdateSwitch";
 import { ReleaseChannelSelector } from "@/components/ReleaseChannelSelector";
 import { NeonIntegration } from "@/components/NeonIntegration";
 import { RuntimeModeSelector } from "@/components/RuntimeModeSelector";
+import { SignOutButton } from "@/components/SignOutButton";
+import { useAuth } from "@clerk/clerk-react";
+import { SignInDialog } from "@/components/SignInDialog";
 
 export default function SettingsPage() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -31,6 +34,17 @@ export default function SettingsPage() {
   const appVersion = useAppVersion();
   const { settings, updateSettings } = useSettings();
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+
+  // If user is not signed in, show sign-in dialog
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <SignInDialog open={true} onOpenChange={setShowSignInDialog} />
+      </div>
+    );
+  }
 
   const handleResetEverything = async () => {
     setIsResetting(true);
@@ -50,158 +64,179 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen px-8 py-4">
-      <div className="max-w-5xl mx-auto">
-        <Button
-          onClick={() => router.history.back()}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 mb-4 bg-(--background-lightest) py-5"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
-        <div className="flex justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Settings
-          </h1>
-        </div>
-
-        <div className="space-y-6">
-          <GeneralSettings appVersion={appVersion} />
-          <WorkflowSettings />
-          <AISettings />
-
-          <div
-            id="provider-settings"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
+    <>
+      <SignInDialog
+        open={showSignInDialog}
+        onOpenChange={setShowSignInDialog}
+      />
+      <div className="min-h-screen px-8 py-4">
+        <div className="max-w-5xl mx-auto">
+          <Button
+            onClick={() => router.history.back()}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 mb-4 bg-(--background-lightest) py-5"
           >
-            <ProviderSettingsGrid />
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <div className="flex justify-between mb-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Settings
+            </h1>
           </div>
 
           <div className="space-y-6">
+            <GeneralSettings appVersion={appVersion} />
+            <WorkflowSettings />
+            <AISettings />
+
             <div
-              id="telemetry"
+              id="provider-settings"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
+            >
+              <ProviderSettingsGrid />
+            </div>
+
+            <div className="space-y-6">
+              <div
+                id="telemetry"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+              >
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                  Telemetry
+                </h2>
+                <div className="space-y-2">
+                  <TelemetrySwitch />
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    This records anonymous usage data to improve the product.
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="mr-2 font-medium">Telemetry ID:</span>
+                  <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200 font-mono">
+                    {settings ? settings.telemetryUserId : "n/a"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Integrations Section */}
+            <div
+              id="integrations"
               className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
             >
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Telemetry
+                Integrations
               </h2>
-              <div className="space-y-2">
-                <TelemetrySwitch />
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  This records anonymous usage data to improve the product.
-                </div>
-              </div>
-
-              <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span className="mr-2 font-medium">Telemetry ID:</span>
-                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200 font-mono">
-                  {settings ? settings.telemetryUserId : "n/a"}
-                </span>
+              <div className="space-y-4">
+                <GitHubIntegration />
+                <VercelIntegration />
+                <SupabaseIntegration />
+                <NeonIntegration />
               </div>
             </div>
-          </div>
 
-          {/* Integrations Section */}
-          <div
-            id="integrations"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
-          >
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Integrations
-            </h2>
-            <div className="space-y-4">
-              <GitHubIntegration />
-              <VercelIntegration />
-              <SupabaseIntegration />
-              <NeonIntegration />
-            </div>
-          </div>
-
-          {/* Experiments Section */}
-          <div
-            id="experiments"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
-          >
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Experiments
-            </h2>
-            <div className="space-y-4">
-              <div className="space-y-1 mt-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="enable-native-git"
-                    checked={!!settings?.enableNativeGit}
-                    onCheckedChange={(checked) => {
-                      updateSettings({
-                        enableNativeGit: checked,
-                      });
-                    }}
-                  />
-                  <Label htmlFor="enable-native-git">Enable Native Git</Label>
+            {/* Experiments Section */}
+            <div
+              id="experiments"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+            >
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Experiments
+              </h2>
+              <div className="space-y-4">
+                <div className="space-y-1 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="enable-native-git"
+                      checked={!!settings?.enableNativeGit}
+                      onCheckedChange={(checked) => {
+                        updateSettings({
+                          enableNativeGit: checked,
+                        });
+                      }}
+                    />
+                    <Label htmlFor="enable-native-git">Enable Native Git</Label>
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Native Git offers faster performance but requires{" "}
+                    <a
+                      onClick={() => {
+                        IpcClient.getInstance().openExternalUrl(
+                          "https://git-scm.com/downloads",
+                        );
+                      }}
+                      className="text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      installing Git
+                    </a>
+                    .
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Native Git offers faster performance but requires{" "}
-                  <a
-                    onClick={() => {
-                      IpcClient.getInstance().openExternalUrl(
-                        "https://git-scm.com/downloads",
-                      );
-                    }}
-                    className="text-blue-600 hover:underline dark:text-blue-400"
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div
+              id="danger-zone"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-red-200 dark:border-red-800"
+            >
+              <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-4">
+                Danger Zone
+              </h2>
+
+              <div className="space-y-4">
+                <div className="flex items-start justify-between flex-col sm:flex-row sm:items-center gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                      Reset Everything
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      This will delete all your apps, chats, and settings. This
+                      action cannot be undone.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsResetDialogOpen(true)}
+                    disabled={isResetting}
+                    className="rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    installing Git
-                  </a>
-                  .
+                    {isResetting ? "Resetting..." : "Reset Everything"}
+                  </button>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Danger Zone */}
-          <div
-            id="danger-zone"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-red-200 dark:border-red-800"
-          >
-            <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-4">
-              Danger Zone
-            </h2>
-
-            <div className="space-y-4">
-              <div className="flex items-start justify-between flex-col sm:flex-row sm:items-center gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                    Reset Everything
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    This will delete all your apps, chats, and settings. This
-                    action cannot be undone.
-                  </p>
+                {/* Sign Out Button */}
+                <div className="flex items-start justify-between flex-col sm:flex-row sm:items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                      Sign Out
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Sign out of your account and return to the login screen.
+                    </p>
+                  </div>
+                  <SignOutButton className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    Sign Out
+                  </SignOutButton>
                 </div>
-                <button
-                  onClick={() => setIsResetDialogOpen(true)}
-                  disabled={isResetting}
-                  className="rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isResetting ? "Resetting..." : "Reset Everything"}
-                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <ConfirmationDialog
-        isOpen={isResetDialogOpen}
-        title="Reset Everything"
-        message="Are you sure you want to reset everything? This will delete all your apps, chats, and settings. This action cannot be undone."
-        confirmText="Reset Everything"
-        cancelText="Cancel"
-        onConfirm={handleResetEverything}
-        onCancel={() => setIsResetDialogOpen(false)}
-      />
-    </div>
+        <ConfirmationDialog
+          isOpen={isResetDialogOpen}
+          title="Reset Everything"
+          message="Are you sure you want to reset everything? This will delete all your apps, chats, and settings. This action cannot be undone."
+          confirmText="Reset Everything"
+          cancelText="Cancel"
+          onConfirm={handleResetEverything}
+          onCancel={() => setIsResetDialogOpen(false)}
+        />
+      </div>
+    </>
   );
 }
 

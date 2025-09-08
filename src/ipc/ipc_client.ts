@@ -1164,4 +1164,24 @@ export class IpcClient {
   public cancelHelpChat(sessionId: string): void {
     this.ipcRenderer.invoke("help:chat:cancel", sessionId).catch(() => {});
   }
+
+  public async getSubscriptionStatus(
+    userId: string,
+  ): Promise<{ isSubscribed: boolean; tier?: string }> {
+    return this.ipcRenderer.invoke("get-subscription-status", userId);
+  }
+
+  public async createSubscription(
+    userId: string,
+    userEmail: string,
+    userName: string | undefined,
+    priceId: string,
+  ): Promise<{ success: boolean; sessionId?: string; error?: string }> {
+    return this.ipcRenderer.invoke("create-subscription", {
+      userId,
+      userEmail,
+      userName,
+      priceId,
+    });
+  }
 }

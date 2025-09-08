@@ -311,12 +311,12 @@ export class PageObject {
   async setUpDyadProvider() {
     await this.page
       .locator("div")
-      .filter({ hasText: /^DyadNeeds Setup$/ })
+      .filter({ hasText: /^DrewNeeds Setup$/ })
       .nth(1)
       .click();
-    await this.page.getByRole("textbox", { name: "Set Dyad API Key" }).click();
+    await this.page.getByRole("textbox", { name: "Set Drew API Key" }).click();
     await this.page
-      .getByRole("textbox", { name: "Set Dyad API Key" })
+      .getByRole("textbox", { name: "Set Drew API Key" })
       .fill("testdyadkey");
     await this.page.getByRole("button", { name: "Save Key" }).click();
   }
@@ -993,6 +993,21 @@ export class PageObject {
     for (let i = 0; i < count; i++) {
       await closeButtons.nth(i).click();
     }
+  }
+
+  async waitForChatInputToBeReady() {
+    // Wait for either the Lexical editor or the plain textarea to be ready
+    await expect(async () => {
+      const lexicalEditor = this.page.locator(
+        '[data-lexical-editor="true"][aria-placeholder="Ask Drew to build..."]',
+      );
+      const plainTextarea = this.page.locator(
+        'textarea[placeholder="Ask Drew to build..."]',
+      );
+      const isLexicalReady = await lexicalEditor.isVisible();
+      const isPlainReady = await plainTextarea.isVisible();
+      expect(isLexicalReady || isPlainReady).toBe(true);
+    }).toPass();
   }
 
   async sleep(ms: number) {

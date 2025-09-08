@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 
 import { useSettings } from "@/hooks/useSettings";
 import { IpcClient } from "@/ipc/ipc_client";
@@ -65,6 +66,7 @@ import { selectedComponentPreviewAtom } from "@/atoms/previewAtoms";
 import { SelectedComponentDisplay } from "./SelectedComponentDisplay";
 import { useCheckProblems } from "@/hooks/useCheckProblems";
 import { LexicalChatInput } from "./LexicalChatInput";
+import { SignUpModal } from "@/components/SignUpModal";
 
 const showTokenBarAtom = atom(false);
 
@@ -99,6 +101,10 @@ export function ChatInput({ chatId }: { chatId?: number }) {
     handlePaste,
   } = useAttachments();
 
+  // Add auth hook and sign up modal state
+  const { isSignedIn } = useAuth();
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+
   // Use the hook to fetch the proposal
   const {
     proposalResult,
@@ -124,6 +130,12 @@ export function ChatInput({ chatId }: { chatId?: number }) {
   }, [chatId, setMessages]);
 
   const handleSubmit = async () => {
+    // Check if user is signed in before allowing message submission
+    if (!isSignedIn) {
+      setShowSignUpModal(true);
+      return;
+    }
+
     if (
       (!inputValue.trim() && attachments.length === 0) ||
       isStreaming ||
@@ -227,6 +239,9 @@ export function ChatInput({ chatId }: { chatId?: number }) {
 
   return (
     <>
+      {/* Sign up modal for unsigned users */}
+      <SignUpModal open={showSignUpModal} onOpenChange={setShowSignUpModal} />
+
       {error && showError && (
         <ChatErrorBox
           onDismiss={dismissError}
@@ -292,7 +307,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
               onChange={setInputValue}
               onSubmit={handleSubmit}
               onPaste={handlePaste}
-              placeholder="Ask Dyad to build..."
+              placeholder="Ask Drew to build..."
               excludeCurrentApp={true}
             />
 

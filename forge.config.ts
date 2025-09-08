@@ -54,8 +54,8 @@ const config: ForgeConfig = {
   packagerConfig: {
     protocols: [
       {
-        name: "Dyad",
-        schemes: ["dyad"],
+        name: "Deepseekdrew",
+        schemes: ["deepseekdrew"],
       },
     ],
     icon: "./assets/icon/logo",
@@ -88,7 +88,7 @@ const config: ForgeConfig = {
     new MakerRpm({}),
     new MakerDeb({
       options: {
-        mimeType: ["x-scheme-handler/dyad"],
+        mimeType: ["x-scheme-handler/deepseekdrew"],
       },
     }),
   ],
@@ -97,8 +97,8 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "dyad-sh",
-          name: "dyad",
+          owner: "deepseekdrew-sh",
+          name: "deepseekdrew",
         },
         draft: true,
         force: true,

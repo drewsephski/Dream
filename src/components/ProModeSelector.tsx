@@ -13,11 +13,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Info } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
-import { IpcClient } from "@/ipc/ipc_client";
 import { hasDyadProKey, type UserSettings } from "@/lib/schemas";
+import { useState } from "react";
+import { SubscriptionDialog } from "@/components/SubscriptionDialog";
 
 export function ProModeSelector() {
   const { settings, updateSettings } = useSettings();
+  const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
 
   const toggleLazyEdits = () => {
     updateSettings({
@@ -56,73 +58,76 @@ export function ProModeSelector() {
   const proModeTogglable = hasProKey && Boolean(settings?.enableDyadPro);
 
   return (
-    <Popover>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="has-[>svg]:px-1.5 flex items-center gap-1.5 h-8 border-primary/50 hover:bg-primary/10 font-medium shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
-            >
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium text-xs-sm">Pro</span>
-            </Button>
-          </PopoverTrigger>
-        </TooltipTrigger>
-        <TooltipContent>Configure Dyad Pro settings</TooltipContent>
-      </Tooltip>
-      <PopoverContent className="w-80 border-primary/20">
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h4 className="font-medium flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium">Dyad Pro</span>
-            </h4>
-            <div className="h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent" />
-          </div>
-          {!hasProKey && (
-            <div className="text-sm text-center text-muted-foreground">
-              <a
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                onClick={() => {
-                  IpcClient.getInstance().openExternalUrl(
-                    "https://dyad.sh/pro#ai",
-                  );
-                }}
+    <>
+      <Popover>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="has-[>svg]:px-1.5 flex items-center gap-1.5 h-8 border-primary/50 hover:bg-primary/10 font-medium shadow-sm shadow-primary/10 transition-all hover:shadow-md hover:shadow-primary/15"
               >
-                Unlock Pro modes
-              </a>
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-primary font-medium text-xs-sm">Pro</span>
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Configure Pro settings</TooltipContent>
+        </Tooltip>
+        <PopoverContent className="w-80 border-primary/20">
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <h4 className="font-medium flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-primary font-medium">DeepSeekDrew Pro</span>
+              </h4>
+              <div className="h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent" />
             </div>
-          )}
-          <div className="flex flex-col gap-5">
-            <SelectorRow
-              id="pro-enabled"
-              label="Enable Dyad Pro"
-              description="Use Dyad Pro AI credits"
-              tooltip="Uses Dyad Pro AI credits for the main AI model and Pro modes."
-              isTogglable={hasProKey}
-              settingEnabled={Boolean(settings?.enableDyadPro)}
-              toggle={toggleProEnabled}
-            />
-            <SelectorRow
-              id="lazy-edits"
-              label="Turbo Edits"
-              description="Makes file edits faster and cheaper"
-              tooltip="Uses a faster, cheaper model to generate full file updates."
-              isTogglable={proModeTogglable}
-              settingEnabled={Boolean(settings?.enableProLazyEditsMode)}
-              toggle={toggleLazyEdits}
-            />
-            <SmartContextSelector
-              isTogglable={proModeTogglable}
-              settings={settings}
-              onValueChange={handleSmartContextChange}
-            />
+            {!hasProKey && (
+              <div className="text-sm text-center text-muted-foreground">
+                <Button
+                  variant="outline"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  onClick={() => setShowSubscriptionDialog(true)}
+                >
+                  Unlock Pro modes
+                </Button>
+              </div>
+            )}
+            <div className="flex flex-col gap-5">
+              <SelectorRow
+                id="pro-enabled"
+                label="Enable Drew Pro"
+                description="Use Pro AI credits"
+                tooltip="Uses Drew Pro AI credits for the main AI model and Pro modes."
+                isTogglable={hasProKey}
+                settingEnabled={Boolean(settings?.enableDyadPro)}
+                toggle={toggleProEnabled}
+              />
+              <SelectorRow
+                id="lazy-edits"
+                label="Turbo Edits"
+                description="Makes file edits faster and cheaper"
+                tooltip="Uses a faster, cheaper model to generate full file updates."
+                isTogglable={proModeTogglable}
+                settingEnabled={Boolean(settings?.enableProLazyEditsMode)}
+                toggle={toggleLazyEdits}
+              />
+              <SmartContextSelector
+                isTogglable={proModeTogglable}
+                settings={settings}
+                onValueChange={handleSmartContextChange}
+              />
+            </div>
           </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+      <SubscriptionDialog
+        open={showSubscriptionDialog}
+        onOpenChange={setShowSubscriptionDialog}
+      />
+    </>
   );
 }
 

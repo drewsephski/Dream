@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useRunApp } from "@/hooks/useRunApp";
 import { useAtomValue } from "jotai";
 import { previewModeAtom } from "@/atoms/appAtoms";
+import { AuthStatus } from "@/components/AuthStatus";
 
 export default function RootLayout({
   children,
@@ -16,6 +17,23 @@ export default function RootLayout({
 }) {
   const { refreshAppIframe } = useRunApp();
   const previewMode = useAtomValue(previewModeAtom);
+  
+  // Apply background to body element
+  useEffect(() => {
+    const applyBackground = () => {
+      document.body.style.background = "radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%)";
+      document.body.style.backgroundAttachment = "fixed";
+    };
+
+    applyBackground();
+    
+    // Clean up on unmount
+    return () => {
+      document.body.style.background = "";
+      document.body.style.backgroundAttachment = "";
+    };
+  }, []);
+
   // Global keyboard listener for refresh events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -38,19 +56,22 @@ export default function RootLayout({
   }, [refreshAppIframe, previewMode]);
 
   return (
-    <>
-      <ThemeProvider>
-        <DeepLinkProvider>
-          <SidebarProvider>
-            <TitleBar />
-            <AppSidebar />
-            <div className="flex h-screenish w-full overflow-x-hidden mt-12 mb-4 mr-4 border-t border-l border-border rounded-lg bg-background">
-              {children}
-            </div>
-            <Toaster richColors />
-          </SidebarProvider>
-        </DeepLinkProvider>
-      </ThemeProvider>
-    </>
+    <div className="min-h-screen w-full relative">
+      {/* Your Content/Components */}
+      <div className="relative z-0">
+        <ThemeProvider>
+          <DeepLinkProvider>
+            <SidebarProvider>
+              <TitleBar />
+              <AppSidebar />
+              <div className="flex h-screenish w-full overflow-x-hidden mt-12 mb-4 mr-4 border-t border-l border-border rounded-lg">
+                {children}
+              </div>
+              <Toaster richColors />
+            </SidebarProvider>
+          </DeepLinkProvider>
+        </ThemeProvider>
+      </div>
+    </div>
   );
 }

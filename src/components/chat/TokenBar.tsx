@@ -154,12 +154,12 @@ export function TokenBar({ chatId }: TokenBarProps) {
                     "https://www.dyad.sh/docs/guides/ai-models/pro-modes#smart-context",
                   )
                 : IpcClient.getInstance().openExternalUrl(
-                    "https://dyad.sh/pro#ai",
+                    "https://deepseekdrew.sh/pro#ai",
                   )
             }
             className="text-blue-500 dark:text-blue-400 cursor-pointer hover:underline"
           >
-            Dyad Pro's Smart Context
+            Drew Pro's Smart Context
           </a>
         </div>
       )}

@@ -81,7 +81,7 @@ export function HomeChatInput({
               onChange={setInputValue}
               onSubmit={handleCustomSubmit}
               onPaste={handlePaste}
-              placeholder="Ask Dyad to build..."
+              placeholder="Ask Drew to build..."
               disabled={isStreaming}
               excludeCurrentApp={false}
             />

@@ -77,29 +77,8 @@ export function ChatList({ show }: { show?: boolean }) {
   };
 
   const handleNewChat = async () => {
-    // Only create a new chat if an app is selected
-    if (selectedAppId) {
-      try {
-        // Create a new chat with an empty title for now
-        const chatId = await IpcClient.getInstance().createChat(selectedAppId);
-
-        // Navigate to the new chat
-        setSelectedChatId(chatId);
-        navigate({
-          to: "/chat",
-          search: { id: chatId },
-        });
-
-        // Refresh the chat list
-        await refreshChats();
-      } catch (error) {
-        // DO A TOAST
-        showError(`Failed to create new chat: ${(error as any).toString()}`);
-      }
-    } else {
-      // If no app is selected, navigate to home page
-      navigate({ to: "/" });
-    }
+    // Navigate to home page to show prompt suggestions instead of creating a new chat within current app
+    navigate({ to: "/" });
   };
 
   const handleDeleteChat = async (chatId: number) => {

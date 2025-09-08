@@ -26,8 +26,7 @@ export const CommunityCodeConsentDialog: React.FC<
           <AlertDialogTitle>Community Code Notice</AlertDialogTitle>
           <AlertDialogDescription className="space-y-3">
             <p>
-              This code was created by a Dyad community member, not our core
-              team.
+              This code was created by a Drew.
             </p>
             <p>
               Community code can be very helpful, but since it's built
@@ -36,7 +35,7 @@ export const CommunityCodeConsentDialog: React.FC<
               problems occur.
             </p>
             <p>
-              We recommend reviewing the code on GitHub first. Only proceed if
+              Only proceed if
               you're comfortable with these risks.
             </p>
           </AlertDialogDescription>

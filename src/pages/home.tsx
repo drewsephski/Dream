@@ -85,9 +85,6 @@ export default function HomePage() {
     updateLastVersionLaunched();
   }, [appVersion, settings, updateSettings, theme]);
 
-  // Get the appId from search params
-  const appId = search.appId ? Number(search.appId) : null;
-
   // State for random prompts
   const [randomPrompts, setRandomPrompts] = useState<
     typeof INSPIRATION_PROMPTS
@@ -103,13 +100,6 @@ export default function HomePage() {
   useEffect(() => {
     setRandomPrompts(getRandomPrompts());
   }, [getRandomPrompts]);
-
-  // Redirect to app details page if appId is present
-  useEffect(() => {
-    if (appId) {
-      navigate({ to: "/app-details", search: { appId } });
-    }
-  }, [appId, navigate]);
 
   const handleSubmit = async (options?: HomeSubmitOptions) => {
     const attachments = options?.attachments || [];

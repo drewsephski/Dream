@@ -5,39 +5,59 @@ import {
   CreateOrEditPromptDialog,
 } from "@/components/CreatePromptDialog";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { useAuth } from "@clerk/clerk-react";
+import { SignInDialog } from "@/components/SignInDialog";
+import { useState } from "react";
 
 export default function LibraryPage() {
   const { prompts, isLoading, createPrompt, updatePrompt, deletePrompt } =
     usePrompts();
+  const { isSignedIn } = useAuth();
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+
+  // If user is not signed in, show sign-in dialog
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <SignInDialog open={true} onOpenChange={setShowSignInDialog} />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen px-8 py-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold mr-4">Library: Prompts</h1>
-          <CreatePromptDialog onCreatePrompt={createPrompt} />
-        </div>
+    <>
+      <SignInDialog
+        open={showSignInDialog}
+        onOpenChange={setShowSignInDialog}
+      />
+      <div className="min-h-screen px-8 py-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold mr-4">Library: Prompts</h1>
+            <CreatePromptDialog onCreatePrompt={createPrompt} />
+          </div>
 
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : prompts.length === 0 ? (
-          <div className="text-muted-foreground">
-            No prompts yet. Create one to get started.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {prompts.map((p) => (
-              <PromptCard
-                key={p.id}
-                prompt={p}
-                onUpdate={updatePrompt}
-                onDelete={deletePrompt}
-              />
-            ))}
-          </div>
-        )}
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : prompts.length === 0 ? (
+            <div className="text-muted-foreground">
+              No prompts yet. Create one to get started.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {prompts.map((p) => (
+                <PromptCard
+                  key={p.id}
+                  prompt={p}
+                  onUpdate={updatePrompt}
+                  onDelete={deletePrompt}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

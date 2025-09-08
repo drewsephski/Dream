@@ -7,6 +7,8 @@ import { providerSettingsRoute } from "./routes/settings/providers/$provider";
 import { appDetailsRoute } from "./routes/app-details";
 import { hubRoute } from "./routes/hub";
 import { libraryRoute } from "./routes/library";
+import { authRoute } from "./routes/auth";
+import { NotFoundPage } from "./components/NotFoundPage";
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
@@ -14,33 +16,14 @@ const routeTree = rootRoute.addChildren([
   libraryRoute,
   chatRoute,
   appDetailsRoute,
+  authRoute,
   settingsRoute.addChildren([providerSettingsRoute]),
 ]);
 
-// src/components/NotFoundRedirect.tsx
-import * as React from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-
-export function NotFoundRedirect() {
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    // Navigate to the main route ('/') immediately on mount
-    // 'replace: true' prevents the invalid URL from being added to browser history
-    navigate({ to: "/", replace: true });
-  }, [navigate]); // Dependency array ensures this runs only once
-
-  // Optionally render null or a loading indicator while redirecting
-  // The redirect is usually very fast, so null is often fine.
-  return null;
-  // Or: return <div>Redirecting...</div>;
-}
-
 export const router = createRouter({
   routeTree,
-  defaultNotFoundComponent: NotFoundRedirect,
-  defaultErrorComponent: ErrorBoundary,
+  defaultNotFoundComponent: NotFoundPage,
+  defaultErrorComponent: () => null, // Remove the error boundary for now
 });
 
 declare module "@tanstack/react-router" {

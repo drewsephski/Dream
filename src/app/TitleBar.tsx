@@ -4,8 +4,7 @@ import { useLoadApps } from "@/hooks/useLoadApps";
 import { useRouter, useLocation } from "@tanstack/react-router";
 import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
-// @ts-ignore
-import logo from "../../assets/logo.svg";
+import { DrewLogo } from "@/components/DrewLogo"; // Replace the logo import
 import { providerSettingsRoute } from "@/routes/settings/providers/$provider";
 import { cn } from "@/lib/utils";
 import { useDeepLink } from "@/contexts/DeepLinkContext";
@@ -21,8 +20,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PreviewHeader } from "@/components/preview_panel/PreviewHeader";
+import { SubscriptionStatus } from "@/components/subscription/SubscriptionStatus";
+import { AuthStatus } from "@/components/AuthStatus";
 
-export const TitleBar = () => {
+export function TitleBar() {
   const [selectedAppId] = useAtom(selectedAppIdAtom);
   const { apps } = useLoadApps();
   const { navigate } = useRouter();
@@ -68,7 +69,7 @@ export const TitleBar = () => {
 
   const handleAppClick = () => {
     if (selectedApp) {
-      navigate({ to: "/app-details", search: { appId: selectedApp.id } });
+      navigate({ to: "/app/$appId", params: { appId: selectedApp.id.toString() } });
     }
   };
 
@@ -80,7 +81,7 @@ export const TitleBar = () => {
       <div className="@container z-11 w-full h-11 bg-(--sidebar) absolute top-0 left-0 app-region-drag flex items-center">
         <div className={`${showWindowControls ? "pl-2" : "pl-18"}`}></div>
 
-        <img src={logo} alt="Dyad Logo" className="w-6 h-6 mr-0.5" />
+        <DrewLogo size="sm" className="mr-0.5" />
         <Button
           data-testid="title-bar-app-name-button"
           variant="outline"
@@ -92,7 +93,13 @@ export const TitleBar = () => {
         >
           {displayText}
         </Button>
-        {isDyadPro && <DyadProButton isDyadProEnabled={isDyadProEnabled} />}
+        {/* Dyad Pro button removed as per user request to remove Dyad from providers list */}
+        {/* {isDyadPro && <DyadProButton isDyadProEnabled={isDyadProEnabled} />} */}
+        
+        {/* User profile in the top right corner, properly spaced */}
+        <div className="ml-auto mr-2 no-app-region-drag">
+          <AuthStatus />
+        </div>
 
         {/* Preview Header */}
         {location.pathname === "/chat" && (
@@ -110,7 +117,7 @@ export const TitleBar = () => {
       />
     </>
   );
-};
+}
 
 function WindowsControls() {
   const { isDarkMode } = useTheme();

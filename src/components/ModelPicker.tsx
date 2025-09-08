@@ -186,69 +186,6 @@ export function ModelPicker() {
         ) : (
           /* Cloud models loaded */
           <>
-            {/* Auto models at top level if any */}
-            {autoModels.length > 0 && (
-              <>
-                {autoModels.map((model) => (
-                  <Tooltip key={`auto-${model.apiName}`}>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuItem
-                        className={
-                          selectedModel.provider === "auto" &&
-                          selectedModel.name === model.apiName
-                            ? "bg-secondary"
-                            : ""
-                        }
-                        onClick={() => {
-                          onModelSelect({
-                            name: model.apiName,
-                            provider: "auto",
-                          });
-                          setOpen(false);
-                        }}
-                      >
-                        <div className="flex justify-between items-start w-full">
-                          <span className="flex flex-col items-start">
-                            <span>
-                              {isSmartAutoEnabled
-                                ? "Smart Auto"
-                                : model.displayName}
-                            </span>
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            {isSmartAutoEnabled && (
-                              <span className="text-[10px] bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 bg-[length:200%_100%] animate-[shimmer_5s_ease-in-out_infinite] text-white px-1.5 py-0.5 rounded-full font-medium">
-                                Dyad Pro
-                              </span>
-                            )}
-                            {model.tag && (
-                              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                                {model.tag}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </DropdownMenuItem>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      {isSmartAutoEnabled ? (
-                        <p>
-                          <strong>Smart Auto</strong> uses a cheaper model for
-                          easier tasks
-                          <br /> and a flagship model for harder tasks
-                        </p>
-                      ) : (
-                        model.description
-                      )}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-                {Object.keys(modelsByProviders).length > 1 && (
-                  <DropdownMenuSeparator />
-                )}
-              </>
-            )}
-
             {/* Primary providers as submenus */}
             {primaryProviders.map(([providerId, models]) => {
               const provider = providers?.find((p) => p.id === providerId);

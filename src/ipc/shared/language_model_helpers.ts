@@ -183,6 +183,16 @@ export const MODEL_OPTIONS: Record<string, ModelOption[]> = {
       temperature: 0,
       dollarSigns: 2,
     },
+    // https://openrouter.ai/glm/glm-4.5-air-free
+    {
+      name: "z-ai/glm-4.5-air:free",
+      displayName: "GLM-4.5 Air (free)",
+      description: "Zhipu AI's GLM-4.5 Air model with free tier access",
+      maxOutputTokens: 32_000,
+      contextWindow: 128_000,
+      temperature: 0,
+      dollarSigns: 2,
+    },
   ],
   auto: [
     {
@@ -275,11 +285,6 @@ export const CLOUD_PROVIDERS: Record<
     hasFreeTier: true,
     websiteUrl: "https://openrouter.ai/settings/keys",
     gatewayPrefix: "openrouter/",
-  },
-  auto: {
-    displayName: "Dyad",
-    websiteUrl: "https://academy.dyad.sh/settings",
-    gatewayPrefix: "dyad/",
   },
   azure: {
     displayName: "Azure OpenAI",

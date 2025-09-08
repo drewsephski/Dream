@@ -1,24 +1,40 @@
 import { IpcClient } from "@/ipc/ipc_client";
 import { X } from "lucide-react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { CircleX } from "lucide-react";
+import { SubscriptionFormWrapper } from "@/components/subscription/SubscriptionForm";
+import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Link } from "@tanstack/react-router";
+
+interface ChatErrorBoxProps {
+  onDismiss: () => void;
+  error: any;
+  isDyadProEnabled: boolean;
+}
 
 export function ChatErrorBox({
   onDismiss,
   error,
   isDyadProEnabled,
-}: {
-  onDismiss: () => void;
-  error: string;
-  isDyadProEnabled: boolean;
-}) {
-  if (error.includes("doesn't have a free quota tier")) {
+}: ChatErrorBoxProps) {
+  const { userBudget } = useUserBudgetInfo();
+  const { subscriptionStatus } = useSubscription();
+
+  const isSubscribed = subscriptionStatus?.isSubscribed || false;
+  const usedCredits = userBudget?.usedCredits || 0;
+  const totalCredits = userBudget?.totalCredits || 5;
+  const remainingCredits = Math.max(0, totalCredits - usedCredits);
+
+  if (error.includes && error.includes("doesn't have a free quota tier")) {
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         {error}
         <span className="ml-1">
-          <ExternalLink href="https://dyad.sh/pro">
-            Access with Dyad Pro
+          <ExternalLink href="https://deepseekdrew.sh/pro">
+            Access with Drew Pro
           </ExternalLink>
         </span>{" "}
         or switch to another model.
@@ -29,20 +45,21 @@ export function ChatErrorBox({
   // Important, this needs to come after the "free quota tier" check
   // because it also includes this URL in the error message
   if (
-    error.includes("Resource has been exhausted") ||
-    error.includes("https://ai.google.dev/gemini-api/docs/rate-limits")
+    error.includes &&
+    (error.includes("Resource has been exhausted") ||
+      error.includes("https://ai.google.dev/gemini-api/docs/rate-limits"))
   ) {
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         {error}
         <span className="ml-1">
-          <ExternalLink href="https://dyad.sh/pro">
-            Upgrade to Dyad Pro
-          </ExternalLink>
+          <Link to="/settings">
+            Upgrade to Drew Pro
+          </Link>
         </span>{" "}
         or read the
         <span className="ml-1">
-          <ExternalLink href="https://dyad.sh/docs/help/ai-rate-limit">
+          <ExternalLink href="https://deepseekdrew.com">
             Rate limit troubleshooting guide.
           </ExternalLink>
         </span>
@@ -50,37 +67,62 @@ export function ChatErrorBox({
     );
   }
 
-  if (error.includes("LiteLLM Virtual Key expected")) {
+  if (error.includes && error.includes("LiteLLM Virtual Key expected")) {
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
         <span>
-          Looks like you don't have a valid Dyad Pro key.{" "}
-          <ExternalLink href="https://dyad.sh/pro">
-            Upgrade to Dyad Pro
+          Looks like you don't have a valid Pro key.{" "}
+          <ExternalLink href="https://deepseekdrew.com">
+            Upgrade to Pro
           </ExternalLink>{" "}
           today.
         </span>
       </ChatInfoContainer>
     );
   }
-  if (isDyadProEnabled && error.includes("ExceededBudget:")) {
+
+  // Check if user has run out of credits
+  if (remainingCredits <= 0 && !isSubscribed) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-200">
+        <div className="flex items-start gap-2">
+          <CircleX className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div>
+            <h3 className="font-medium">You've run out of AI credits</h3>
+            <p className="mt-1">
+              You have used all of your free credits this month. Upgrade to Pro
+              for unlimited access.
+            </p>
+            <div className="mt-3">
+              <SubscriptionFormWrapper />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isDyadProEnabled && error.includes && error.includes("ExceededBudget:")) {
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
         <span>
-          You have used all of your Dyad AI credits this month.{" "}
-          <ExternalLink href="https://academy.dyad.sh/subscription">
-            Upgrade to Dyad Max
-          </ExternalLink>{" "}
+          You have used all of your credits this month.{" "}
+          <Link to="/app/$appId" params={{ appId: "TODO" }}>Upgrade to Max</Link>{" "}
           and get more AI credits
         </span>
       </ChatInfoContainer>
     );
   }
   // This is a very long list of model fallbacks that clutters the error message.
-  if (error.includes("Fallbacks=")) {
-    error = error.split("Fallbacks=")[0];
+  let errorMessage = error;
+  if (error.includes && error.includes("Fallbacks=")) {
+    errorMessage = error.split("Fallbacks=")[0];
   }
-  return <ChatErrorContainer onDismiss={onDismiss}>{error}</ChatErrorContainer>;
+  return (
+    <ChatErrorContainer onDismiss={onDismiss}>
+      {errorMessage}
+    </ChatErrorContainer>
+  );
 }
 
 function ExternalLink({

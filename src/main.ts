@@ -1,23 +1,23 @@
-import { app, BrowserWindow, dialog } from "electron";
-import * as path from "node:path";
-import { registerIpcHandlers } from "./ipc/ipc_host";
-import dotenv from "dotenv";
-// @ts-ignore
-import started from "electron-squirrel-startup";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
+import { app, BrowserWindow, ipcMain, protocol, dialog } from "electron";
+import path from "path";
 import log from "electron-log";
+import dotenv from "dotenv";
+import { registerIpcHandlers } from "./ipc/ipc_host";
+import { startWebhookServer, stopWebhookServer } from "./main/webhook_server";
+import { handleNeonOAuthReturn } from "./neon_admin/neon_return_handler";
+import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
+import { handleDyadProReturn } from "./main/pro";
+import { BackupManager } from "./backup_manager";
 import {
   getSettingsFilePath,
   readSettings,
   writeSettings,
 } from "./main/settings";
-import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
-import { handleDyadProReturn } from "./main/pro";
+import { initializeDatabase, getDatabasePath } from "./db";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
-import { BackupManager } from "./backup_manager";
-import { getDatabasePath, initializeDatabase } from "./db";
-import { UserSettings } from "./lib/schemas";
-import { handleNeonOAuthReturn } from "./neon_admin/neon_return_handler";
+import { UpdateSourceType, updateElectronApp } from "update-electron-app";
+import { type UserSettings } from "./lib/schemas";
+import { handleStripeWebhook } from "./main/stripe_webhook_handler";
 
 log.errorHandler.startCatching();
 log.eventLogger.startLogging();
@@ -32,19 +32,21 @@ dotenv.config();
 registerIpcHandlers();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
-  app.quit();
-}
+// This check is typically used to detect if the app was started as part of an installation process
+// For now, we'll just comment it out as it's causing issues
+// if (started) {
+//   app.quit();
+// }
 
 // https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app#main-process-mainjs
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("dyad", process.execPath, [
+    app.setAsDefaultProtocolClient("deepseekdrew", process.execPath, [
       path.resolve(process.argv[1]),
     ]);
   }
 } else {
-  app.setAsDefaultProtocolClient("dyad");
+  app.setAsDefaultProtocolClient("deepseekdrew");
 }
 
 export async function onReady() {
@@ -68,13 +70,13 @@ export async function onReady() {
     // but this is more explicit and falls back to stable if there's an unknown
     // release channel.
     const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://api.dyad.sh/v1/update/${postfix}`;
+    const host = `https://api.deepseekdrew.sh/v1/update/${postfix}`;
     logger.info("Auto-update release channel=", postfix);
     updateElectronApp({
       logger,
       updateSource: {
         type: UpdateSourceType.ElectronPublicUpdateService,
-        repo: "dyad-sh/dyad",
+        repo: "deepseekdrew-sh/deepseekdrew",
         host,
       },
     }); // additional configuration options available
@@ -82,12 +84,7 @@ export async function onReady() {
 }
 
 export async function onFirstRunMaybe(settings: UserSettings) {
-  if (!settings.hasRunBefore) {
-    await promptMoveToApplicationsFolder();
-    writeSettings({
-      hasRunBefore: true,
-    });
-  }
+  // Skip the "move to applications folder" prompt for development
   if (IS_TEST_BUILD) {
     writeSettings({
       isTestMode: true,
@@ -129,7 +126,7 @@ declare global {
 
 let mainWindow: BrowserWindow | null = null;
 
-const createWindow = () => {
+function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: process.env.NODE_ENV === "development" ? 1280 : 960,
@@ -163,7 +160,7 @@ const createWindow = () => {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
   }
-};
+}
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -179,8 +176,26 @@ if (!gotTheLock) {
     // the commandLine is array of strings in which last element is deep link url
     handleDeepLinkReturn(commandLine.pop()!);
   });
-  app.whenReady().then(onReady);
+  app.whenReady().then(() => {
+    onReady();
+
+    // Register IPC handlers
+    registerIpcHandlers();
+
+    // Start webhook server for Stripe
+    startWebhookServer(3001);
+
+    // Handle deep link URLs
+    protocol.registerStringProtocol("deepseekdrew", (request, callback) => {
+      handleDeepLinkReturn(request.url);
+    });
+  });
 }
+
+app.on("before-quit", () => {
+  // Stop webhook server before quitting
+  stopWebhookServer();
+});
 
 // Handle the protocol. In this case, we choose to show an Error Box.
 app.on("open-url", (event, url) => {
@@ -188,7 +203,7 @@ app.on("open-url", (event, url) => {
 });
 
 function handleDeepLinkReturn(url: string) {
-  // example url: "dyad://supabase-oauth-return?token=a&refreshToken=b"
+  // example url: "deepseekdrew://supabase-oauth-return?token=a&refreshToken=b"
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -204,10 +219,10 @@ function handleDeepLinkReturn(url: string) {
     "hostname",
     parsed.hostname,
   );
-  if (parsed.protocol !== "dyad:") {
+  if (parsed.protocol !== "deepseekdrew:") {
     dialog.showErrorBox(
       "Invalid Protocol",
-      `Expected dyad://, got ${parsed.protocol}. Full URL: ${url}`,
+      `Expected deepseekdrew://, got ${parsed.protocol}. Full URL: ${url}`,
     );
     return;
   }
@@ -285,3 +300,9 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+// Register the Stripe webhook handler
+// This would typically be done through an Express server or similar
+// For Electron, you might need to set up a separate server or use a different approach
+// For now, we'll just export the handler for use elsewhere
+export { handleStripeWebhook };

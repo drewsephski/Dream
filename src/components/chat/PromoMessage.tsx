@@ -56,7 +56,7 @@ export function Message({ spans }: MessageConfig) {
 export const TURBO_EDITS_PROMO_MESSAGE: MessageConfig = {
   spans: [
     { type: "text", content: "Tired of waiting on AI?" },
-    { type: "link", content: " Get Dyad Pro", url: "https://dyad.sh/pro#ai" },
+    { type: "link", content: " Get Drew Pro", url: "/subscription" },
     { type: "text", content: " for faster edits with Turbo Edits." },
   ],
 };
@@ -66,8 +66,8 @@ export const SMART_CONTEXT_PROMO_MESSAGE: MessageConfig = {
     { type: "text", content: "Save up to 5x on AI costs with " },
     {
       type: "link",
-      content: "Dyad Pro's Smart Context",
-      url: "https://dyad.sh/pro#ai",
+      content: "Drew Pro's Smart Context",
+      url: "https://deepseekdrew.com",
     },
   ],
 };
@@ -88,43 +88,15 @@ export const REDDIT_TIP: MessageConfig = {
       type: "text",
       content: "Join 600+ builders in the ",
     },
-    {
-      type: "link",
-      content: "Dyad subreddit",
-      url: "https://www.reddit.com/r/dyadbuilders/",
-    },
+   
   ],
 };
 
-export const REPORT_A_BUG_TIP: MessageConfig = {
-  spans: [
-    {
-      type: "text",
-      content: "Found a bug? Click Help > Report a Bug",
-    },
-  ],
-};
-
-export const UPLOAD_CHAT_TIP: MessageConfig = {
-  spans: [
-    {
-      type: "text",
-      content:
-        "Want to report a bad AI response? Upload the chat by clicking Help",
-    },
-  ],
-};
-// https://www.youtube.com/watch?v=a7OoruOkkeg&list=PL1xR2pfIiRlW7mgr9AS95OkFQBtvrSlO5
 export const BUILD_A_BIBLE_APP_TIP: MessageConfig = {
   spans: [
     {
-      type: "link",
-      content: "Watch",
-      url: "https://www.youtube.com/watch?v=a7OoruOkkeg&list=PL1xR2pfIiRlW7mgr9AS95OkFQBtvrSlO5",
-    },
-    {
       type: "text",
-      content: " the creator of Dyad build a Bible app step-by-step",
+      content: " the creator of Drew build a Bible app step-by-step",
     },
   ],
 };
@@ -138,12 +110,12 @@ export const DEBUGGING_TIPS_TIP: MessageConfig = {
     {
       type: "link",
       content: "debugging tips",
-      url: "https://www.dyad.sh/docs/guides/debugging",
+      url: "https://www.deepseekdrew.sh/docs/guides/debugging",
     },
   ],
 };
 
-// Advanced tip: Customize your AI rules https://www.dyad.sh/docs/guides/ai-rules
+// Advanced tip: Customize your AI rules https://www.deepseekdrew.sh/docs/guides/ai-rules
 export const AI_RULES_TIP: MessageConfig = {
   spans: [
     {
@@ -153,21 +125,12 @@ export const AI_RULES_TIP: MessageConfig = {
     {
       type: "link",
       content: "AI rules",
-      url: "https://www.dyad.sh/docs/guides/ai-rules",
+      url: "https://www.deepseekdrew.sh/docs/guides/ai-rules",
     },
   ],
 };
 
-export const NEW_CHAT_TIP: MessageConfig = {
-  spans: [
-    {
-      type: "text",
-      content: "Want to keep the AI focused? Start a new chat.",
-    },
-  ],
-};
-
-// Want to know what's next? Checkout our roadmap https://www.dyad.sh/docs/roadmap
+// Want to know what's next? Checkout our roadmap https://www.deepseekdrew.sh/docs/roadmap
 export const ROADMAP_TIP: MessageConfig = {
   spans: [
     {
@@ -177,37 +140,35 @@ export const ROADMAP_TIP: MessageConfig = {
     {
       type: "link",
       content: "roadmap",
-      url: "https://www.dyad.sh/docs/roadmap",
+      url: "https://www.deepseekdrew.sh/docs/roadmap",
     },
   ],
 };
 
-// Like Dyad? Star it on GitHub https://github.com/dyad-sh/dyad/
+// Like Drew? Star it on GitHub https://github.com/deepseekdrew-sh/deepseekdrew/
 export const GITHUB_TIP: MessageConfig = {
   spans: [
     {
       type: "text",
-      content: "Like Dyad? Star it on ",
+      content: "Like DeepSeekDrew? Star it on ",
     },
     {
       type: "link",
       content: "GitHub",
-      url: "https://github.com/dyad-sh/dyad",
+      url: "https://github.com/drewsephski",
     },
   ],
 };
+
 // Array of all available messages for rotation
 const ALL_MESSAGES = [
   TURBO_EDITS_PROMO_MESSAGE,
   SMART_CONTEXT_PROMO_MESSAGE,
   DIFFERENT_MODEL_TIP,
   REDDIT_TIP,
-  REPORT_A_BUG_TIP,
-  UPLOAD_CHAT_TIP,
   BUILD_A_BIBLE_APP_TIP,
   DEBUGGING_TIPS_TIP,
   AI_RULES_TIP,
-  NEW_CHAT_TIP,
   ROADMAP_TIP,
   GITHUB_TIP,
 ];

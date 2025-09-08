@@ -6,7 +6,7 @@ test("auto update - disable and enable", async ({ po }) => {
 
   await po.toggleAutoUpdate();
   await expect(
-    po.page.getByRole("button", { name: "Restart Dyad" }),
+    po.page.getByRole("button", { name: "Restart Deepseekdrew" }),
   ).toBeVisible();
   await po.snapshotSettings();
 

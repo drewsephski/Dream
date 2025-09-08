@@ -2,6 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcRenderer } from "electron";
+import { IpcClient } from "./ipc/ipc_client";
 
 // Whitelist of valid channels
 const validInvokeChannels = [
@@ -103,9 +104,12 @@ const validInvokeChannels = [
   "open-ios",
   "open-android",
   "check-problems",
-  "restart-dyad",
+  "restart-deepseekdrew",
   "get-templates",
   "portal:migrate-create",
+  // Subscription related channels
+  "create-subscription",
+  "get-subscription-status",
   // Help bot
   "help:chat:start",
   "help:chat:cancel",
@@ -179,5 +183,22 @@ contextBridge.exposeInMainWorld("electron", {
         ipcRenderer.removeListener(channel, listener);
       }
     },
+
+    // Subscription related IPC methods
+    createSubscription: (
+      userId: string,
+      userEmail: string,
+      userName: string | undefined,
+      priceId: string,
+    ) =>
+      ipcRenderer.invoke("create-subscription", {
+        userId,
+        userEmail,
+        userName,
+        priceId,
+      }),
+
+    getSubscriptionStatus: (userId: string) =>
+      ipcRenderer.invoke("get-subscription-status", userId),
   },
 });

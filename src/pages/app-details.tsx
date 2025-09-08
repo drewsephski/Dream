@@ -1,4 +1,4 @@
-import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouter, useSearch, useParams } from "@tanstack/react-router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   appBasePathAtom,
@@ -41,11 +41,14 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useCheckName } from "@/hooks/useCheckName";
 import { AppUpgrades } from "@/components/AppUpgrades";
 import { CapacitorControls } from "@/components/CapacitorControls";
+import { useAuth } from "@clerk/clerk-react";
+import { SignInDialog } from "@/components/SignInDialog";
+import { SubscriptionStatus } from "@/components/subscription/SubscriptionStatus";
 
 export default function AppDetailsPage() {
   const navigate = useNavigate();
   const router = useRouter();
-  const search = useSearch({ from: "/app-details" as const });
+  const search = useSearch({ from: "/app/$appId" as const });
   const [appsList] = useAtom(appsListAtom);
   const { refreshApps } = useLoadApps();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -66,6 +69,17 @@ export default function AppDetailsPage() {
 
   const queryClient = useQueryClient();
   const setSelectedAppId = useSetAtom(selectedAppIdAtom);
+  const { isSignedIn } = useAuth();
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+
+  // If user is not signed in, show sign-in dialog
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <SignInDialog open={true} onOpenChange={setShowSignInDialog} />
+      </div>
+    );
+  }
 
   const debouncedNewCopyAppName = useDebounce(newCopyAppName, 150);
   const { data: checkNameResult, isLoading: isCheckingName } = useCheckName(
@@ -73,8 +87,9 @@ export default function AppDetailsPage() {
   );
   const nameExists = checkNameResult?.exists ?? false;
 
+  const params = useParams({ from: "/app/$appId" as const });
   // Get the appId from search params and find the corresponding app
-  const appId = search.appId ? Number(search.appId) : null;
+  const appId = params.appId ? Number(params.appId) : null;
   const selectedApp = appId ? appsList.find((app) => app.id === appId) : null;
 
   const handleDeleteApp = async () => {
@@ -193,7 +208,7 @@ export default function AppDetailsPage() {
       await refreshApps();
       await IpcClient.getInstance().createChat(appId);
       setIsCopyDialogOpen(false);
-      navigate({ to: "/app-details", search: { appId } });
+      navigate({ to: "/app/$appId", params: { appId: appId.toString() } });
     },
     onError: (error) => {
       showError(error);
@@ -236,7 +251,8 @@ export default function AppDetailsPage() {
         Back
       </Button>
 
-      <div className="w-full max-w-2xl mx-auto mt-10 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
+      {/* Add padding to the top to avoid overlap with the user avatar */}
+      <div className="w-full max-w-2xl mx-auto mt-16 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
         <div className="flex items-center mb-3">
           <h2 className="text-2xl font-bold">{selectedApp.name}</h2>
           <Button
@@ -328,6 +344,14 @@ export default function AppDetailsPage() {
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-2">
+          {/* Add subscription status component */}
+          <SubscriptionStatus
+            onUpgrade={() => {
+              // Handle upgrade action
+              console.log("Upgrade clicked");
+            }}
+          />
+
           <Button
             onClick={() => {
               if (!appId) {

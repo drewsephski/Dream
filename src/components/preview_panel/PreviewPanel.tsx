@@ -106,11 +106,11 @@ export function PreviewPanel() {
     // runApp/stopApp are stable due to useCallback.
   }, [selectedAppId, runApp, stopApp]);
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-hidden">
+    <div className="flex flex-col h-full bg-transparent">
+      <div className="flex-1 overflow-hidden bg-transparent">
         <PanelGroup direction="vertical">
           <Panel id="content" minSize={30}>
-            <div className="h-full overflow-y-auto">
+            <div className="h-full overflow-y-auto bg-transparent">
               {previewMode === "preview" ? (
                 <PreviewIframe key={key} loading={loading} />
               ) : previewMode === "code" ? (
@@ -128,7 +128,7 @@ export function PreviewPanel() {
             <>
               <PanelResizeHandle className="h-1 bg-border hover:bg-gray-400 transition-colors cursor-row-resize" />
               <Panel id="console" minSize={10} defaultSize={30}>
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col h-full bg-transparent">
                   <ConsoleHeader
                     isOpen={true}
                     onToggle={() => setIsConsoleOpen(false)}

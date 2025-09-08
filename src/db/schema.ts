@@ -39,6 +39,14 @@ export const apps = sqliteTable("apps", {
   installCommand: text("install_command"),
   startCommand: text("start_command"),
   chatContext: text("chat_context", { mode: "json" }),
+  // Add subscription-related fields
+  subscriptionId: text("subscription_id"),
+  subscriptionStatus: text("subscription_status", {
+    enum: ["active", "cancelled", "past_due", "unpaid"],
+  }),
+  subscriptionTier: text("subscription_tier", {
+    enum: ["free", "pro"],
+  }).default("free"),
 });
 
 export const chats = sqliteTable("chats", {

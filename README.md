@@ -1,4 +1,11 @@
-# Deepseekdrew
+ run:
+ <br/>
+git clone https://github.com/drewsephski/Dream.git
+ <br/>      cd Dream
+
+      
+      npm i
+      npm start
 
 Free, local, open-source AI app builder.
 
